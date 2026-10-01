@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './env';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { authLimiter, authRouter } from './modules/auth/routes';
 
 export function createApp() {
   const app = express();
@@ -26,6 +27,8 @@ export function createApp() {
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', uptime: Math.round(process.uptime()) });
   });
+
+  app.use('/api/auth', authLimiter, authRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
