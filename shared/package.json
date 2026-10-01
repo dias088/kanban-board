@@ -3,10 +3,29 @@
   "version": "1.0.0",
   "private": true,
   "description": "Validation schemas and DTO types shared by the client and the server",
+  "comment": [
+    "Bundlers get the TypeScript sources and the CommonJS server gets dist.",
+    "Rollup cannot statically read named exports out of tsc's CommonJS output",
+    "(export * becomes __exportStar(require(...))), so pointing Vite at dist",
+    "breaks the production build even though tsc and Vitest are happy."
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./src/index.ts",
+        "default": "./src/index.ts"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "build": "tsc",
