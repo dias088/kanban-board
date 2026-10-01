@@ -10,8 +10,13 @@ export const LABEL_CLASS: Record<LabelColor, string> = {
   violet: 'bg-violet-500',
 };
 
+/**
+ * Pinned to English rather than following the OS locale: the interface is
+ * English only, and a date rendered in another language next to English labels
+ * reads as a bug rather than as localisation.
+ */
 export const formatDueDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
 /** A due date is overdue once its day is behind today's. */
 export const isOverdue = (iso: string): boolean => {

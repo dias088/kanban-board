@@ -7,12 +7,14 @@ import { LoginPage } from '@/features/auth/LoginPage';
 
 function renderLoginPage() {
   const login = vi.fn<AuthContextValue['login']>().mockResolvedValue(undefined);
+  const startDemo = vi.fn<AuthContextValue['startDemo']>().mockResolvedValue(undefined);
 
   const value: AuthContextValue = {
     user: null,
     status: 'anonymous',
     login,
     register: vi.fn(),
+    startDemo,
     logout: vi.fn(),
   };
 
@@ -24,7 +26,7 @@ function renderLoginPage() {
     </MemoryRouter>,
   );
 
-  return { login, user: userEvent.setup() };
+  return { login, startDemo, user: userEvent.setup() };
 }
 
 describe('LoginPage', () => {
@@ -64,6 +66,15 @@ describe('LoginPage', () => {
         password: 'correct-horse-battery',
       });
     });
+  });
+
+  it('starts a demo sandbox without asking for credentials', async () => {
+    const { startDemo, login, user } = renderLoginPage();
+
+    await user.click(screen.getByRole('button', { name: 'Try the demo' }));
+
+    await waitFor(() => expect(startDemo).toHaveBeenCalledTimes(1));
+    expect(login).not.toHaveBeenCalled();
   });
 
   it('shows the server message when the credentials are rejected', async () => {

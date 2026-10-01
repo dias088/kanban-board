@@ -52,6 +52,19 @@ authRouter.post(
   }),
 );
 
+/**
+ * Behind the same rate limit as the credential routes, which is what keeps it
+ * from becoming a way to create accounts in bulk.
+ */
+authRouter.post(
+  '/demo',
+  asyncHandler(async (_req, res) => {
+    const session = await authService.createDemoSession();
+    setRefreshCookie(res, session.refreshToken);
+    res.status(201).json({ accessToken: session.accessToken, user: session.user });
+  }),
+);
+
 authRouter.post(
   '/refresh',
   asyncHandler(async (req, res) => {

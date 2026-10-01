@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import type { LoginInput, RegisterInput, UserDto } from '@kanban/shared';
 import { conflict, unauthorized } from '../../lib/errors';
 import { hashPassword, verifyPassword } from '../../lib/password';
+import { createSampleBoard } from '../../lib/sampleBoard';
 import {
   createRefreshToken,
   hashRefreshToken,
@@ -144,6 +145,32 @@ export async function refreshSession(rawToken: string): Promise<Session> {
     refreshToken: next.token,
     user: toUserDto(stored.user),
   };
+}
+
+/**
+ * Creates a throwaway account with a ready-made board.
+ *
+ * A single shared demo login would let any visitor empty the board for everyone
+ * who comes after them, so each visitor gets their own sandbox instead. The
+ * password is random and never revealed: the only way into the account is the
+ * session handed back here.
+ */
+export async function createDemoSession(): Promise<Session> {
+  const user = await prisma.$transaction(async (tx) => {
+    const created = await tx.user.create({
+      data: {
+        email: `demo-${crypto.randomUUID()}@kanban.dev`,
+        name: 'Demo visitor',
+        passwordHash: await hashPassword(crypto.randomUUID()),
+      },
+    });
+
+    await createSampleBoard(tx, created.id);
+
+    return created;
+  });
+
+  return issueSession(user);
 }
 
 export async function logout(rawToken: string | undefined): Promise<void> {

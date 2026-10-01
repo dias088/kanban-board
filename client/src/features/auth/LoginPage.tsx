@@ -5,15 +5,16 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { loginSchema } from '@kanban/shared';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { ApiError } from '@/lib/api';
+import { ApiError, apiErrorMessage } from '@/lib/api';
 import { useAuth } from './auth-context';
 import { AuthCard } from './AuthCard';
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, startDemo } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [startingDemo, setStartingDemo] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -68,6 +69,32 @@ export function LoginPage() {
           Sign in
         </Button>
       </form>
+
+      <div className="mt-4 border-t border-border pt-4">
+        <Button
+          variant="secondary"
+          className="w-full"
+          loading={startingDemo}
+          onClick={() => {
+            setStartingDemo(true);
+            setSubmitError(null);
+
+            startDemo()
+              .then(() => navigate('/boards', { replace: true }))
+              .catch((error: unknown) => {
+                setSubmitError(
+                  apiErrorMessage(error, 'Could not start the demo, please try again'),
+                );
+              })
+              .finally(() => setStartingDemo(false));
+          }}
+        >
+          Try the demo
+        </Button>
+        <p className="mt-2 text-center text-xs text-content-muted">
+          Opens a private sandbox with a sample board. No sign-up, nothing shared with anyone else.
+        </p>
+      </div>
     </AuthCard>
   );
 }

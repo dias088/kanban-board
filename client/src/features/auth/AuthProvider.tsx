@@ -3,7 +3,7 @@ import type { LoginInput, RegisterInput, UserDto } from '@kanban/shared';
 import { refreshSession, setAccessToken, setUnauthorizedHandler } from '@/lib/api';
 import { queryClient } from '@/lib/queryClient';
 import { AuthContext, type AuthStatus } from './auth-context';
-import { loginRequest, logoutRequest, registerRequest } from './api';
+import { demoRequest, loginRequest, logoutRequest, registerRequest } from './api';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserDto | null>(null);
@@ -58,6 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('authenticated');
   }, []);
 
+  const startDemo = useCallback(async () => {
+    const session = await demoRequest();
+    setAccessToken(session.accessToken);
+    setUser(session.user);
+    setStatus('authenticated');
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await logoutRequest();
@@ -68,8 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [clearSession]);
 
   const value = useMemo(
-    () => ({ user, status, login, register, logout }),
-    [user, status, login, register, logout],
+    () => ({ user, status, login, register, startDemo, logout }),
+    [user, status, login, register, startDemo, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

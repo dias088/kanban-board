@@ -242,6 +242,48 @@ describe('POST /api/auth/refresh', () => {
   });
 });
 
+describe('POST /api/auth/demo', () => {
+  it('hands out a working session with a ready-made board', async () => {
+    const response = await request(app).post('/api/auth/demo');
+
+    expect(response.status).toBe(201);
+    expect(refreshCookieHeader(response)).toContain('HttpOnly');
+
+    const boards = await request(app)
+      .get('/api/boards')
+      .set('Authorization', `Bearer ${response.body.accessToken}`);
+
+    expect(boards.status).toBe(200);
+    expect(boards.body).toHaveLength(1);
+    expect(boards.body[0].columnCount).toBeGreaterThan(0);
+    expect(boards.body[0].cardCount).toBeGreaterThan(0);
+  });
+
+  it('gives every visitor their own sandbox', async () => {
+    const first = await request(app).post('/api/auth/demo');
+    const second = await request(app).post('/api/auth/demo');
+
+    expect(first.body.user.id).not.toBe(second.body.user.id);
+    expect(await prisma.user.count()).toBe(2);
+    expect(await prisma.board.count()).toBe(2);
+
+    // Emptying one sandbox must leave the other untouched
+    const firstBoards = await request(app)
+      .get('/api/boards')
+      .set('Authorization', `Bearer ${first.body.accessToken}`);
+
+    await request(app)
+      .delete(`/api/boards/${firstBoards.body[0].id}`)
+      .set('Authorization', `Bearer ${first.body.accessToken}`);
+
+    const secondBoards = await request(app)
+      .get('/api/boards')
+      .set('Authorization', `Bearer ${second.body.accessToken}`);
+
+    expect(secondBoards.body).toHaveLength(1);
+  });
+});
+
 describe('POST /api/auth/logout', () => {
   it('revokes the presented token and clears the cookie', async () => {
     const registered = await registerUser();
