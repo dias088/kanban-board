@@ -5,6 +5,9 @@ import helmet from 'helmet';
 import { env } from './env';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { authLimiter, authRouter } from './modules/auth/routes';
+import { boardsRouter } from './modules/boards/routes';
+import { cardsRouter } from './modules/cards/routes';
+import { columnsRouter } from './modules/columns/routes';
 
 export function createApp() {
   const app = express();
@@ -29,6 +32,9 @@ export function createApp() {
   });
 
   app.use('/api/auth', authLimiter, authRouter);
+  app.use('/api/boards', boardsRouter);
+  app.use('/api/columns', columnsRouter);
+  app.use('/api/cards', cardsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
