@@ -56,7 +56,13 @@ export function BoardsPage() {
               key={board.id}
               className="group relative rounded-lg border border-border bg-surface p-4 transition hover:border-accent"
             >
-              <Link to={`/boards/${board.id}`} className="block">
+              {/* The label is explicit: a name computed from the heading plus
+                  the counters reads as one long run-on to a screen reader */}
+              <Link
+                to={`/boards/${board.id}`}
+                aria-label={`Open board ${board.title}`}
+                className="block"
+              >
                 <h2 className="truncate pr-8 font-medium text-content">{board.title}</h2>
                 <p className="mt-1 text-sm text-content-muted">
                   {board.columnCount} {board.columnCount === 1 ? 'column' : 'columns'} ·{' '}
