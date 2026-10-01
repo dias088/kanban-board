@@ -1,0 +1,13 @@
+# Normalise line endings. The repository always stores LF and LF is what gets
+# checked out on every platform. Prettier is configured with endOfLine: "lf",
+# so without this a Windows clone would get CRLF and fail `npm run lint`.
+* text=auto eol=lf
+
+# Binary assets must never be converted
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
