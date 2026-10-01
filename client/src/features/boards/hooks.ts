@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { BoardSummaryDto } from '@kanban/shared';
 import { useToast } from '@/components/ui/toast-context';
-import { ApiError } from '@/lib/api';
+import { apiErrorMessage } from '@/lib/api';
 import { createBoardRequest, deleteBoardRequest, fetchBoards } from './api';
 
 export const boardsKey = ['boards'] as const;
@@ -23,7 +23,7 @@ export function useCreateBoard() {
       );
     },
     onError: (error) => {
-      showToast(error instanceof ApiError ? error.message : 'Could not create the board');
+      showToast(apiErrorMessage(error, 'Could not create the board'));
     },
   });
 }
@@ -40,7 +40,7 @@ export function useDeleteBoard() {
       );
     },
     onError: (error) => {
-      showToast(error instanceof ApiError ? error.message : 'Could not delete the board');
+      showToast(apiErrorMessage(error, 'Could not delete the board'));
     },
   });
 }

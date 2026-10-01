@@ -32,6 +32,10 @@ export class ApiError extends Error {
   }
 }
 
+/** Prefers the server's own wording and falls back when the request never landed. */
+export const apiErrorMessage = (error: unknown, fallback: string): string =>
+  error instanceof ApiError ? error.message : fallback;
+
 let onUnauthorized: (() => void) | null = null;
 
 /** Called when a request stays unauthorised even after a refresh attempt. */
