@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+build/
+
+# tests
+coverage/
+
+# secrets — real .env files never reach the repository
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+
+# editors / OS / local agent config
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.claude/

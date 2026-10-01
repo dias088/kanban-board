@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* The palette is declared once as CSS custom properties; the dark theme only
+   overrides the values. Tailwind consumes them through tailwind.config.ts
+   as rgb(var(--...) / <alpha-value>). */
+@layer base {
+  :root {
+    --surface: 255 255 255;
+    --surface-muted: 244 245 247;
+    --border: 226 229 233;
+    --content: 23 28 38;
+    --content-muted: 104 112 128;
+    --accent: 59 108 240;
+    --accent-content: 255 255 255;
+    --danger: 214 64 64;
+  }
+
+  .dark {
+    --surface: 21 24 31;
+    --surface-muted: 29 33 42;
+    --border: 48 54 66;
+    --content: 233 236 241;
+    --content-muted: 148 156 171;
+    --accent: 106 145 255;
+    --accent-content: 12 15 20;
+    --danger: 239 106 106;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-surface-muted text-content antialiased;
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-surface;
+  }
+}

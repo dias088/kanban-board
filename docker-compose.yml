@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kanban-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kanban
+      POSTGRES_PASSWORD: kanban
+      POSTGRES_DB: kanban_dev
+    ports:
+      # If port 5432 is already taken by a local PostgreSQL, change this to
+      # "5433:5432" and update DATABASE_URL in server/.env accordingly.
+      - '5432:5432'
+    volumes:
+      - kanban-pgdata:/var/lib/postgresql/data
+      - ./scripts/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U kanban -d kanban_dev']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  kanban-pgdata:

@@ -1,0 +1,88 @@
+// Kanban board database schema.
+//
+// Ordering of columns and cards is stored in the `position` field using
+// fractional indexing: a new position is the midpoint between its neighbours.
+// See src/lib/position.ts for the details and the rebalancing rules.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+
+  boards        Board[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model Board {
+  id        String   @id @default(uuid())
+  title     String
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  columns Column[]
+
+  @@index([ownerId])
+  @@map("boards")
+}
+
+/// `column` is a reserved word in SQL, so the table is named "columns".
+model Column {
+  id       String @id @default(uuid())
+  title    String
+  boardId  String
+  position Float
+
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards Card[]
+
+  @@index([boardId, position])
+  @@map("columns")
+}
+
+model Card {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  columnId    String
+  position    Float
+  dueDate     DateTime?
+  labelColor  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  column Column @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  @@index([columnId, position])
+  @@map("cards")
+}
+
+/// Only the SHA-256 hash of a refresh token is stored. Every call to /refresh
+/// revokes the current token (revokedAt) and issues a new one (rotation).
+model RefreshToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
